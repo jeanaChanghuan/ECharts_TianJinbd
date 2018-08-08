@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!-- 引入 ECharts 文件 -->
+    <script src="js/echarts.js" type="text/javascript"></script>
+    <script src="js/jquery-1.11.1.min.js" type="text/javascript"></script>
+    <div id="echar" style="width:1000px;height:600px"></div>
+    <script type="text/javascript">
+     
+  	    var tianjin = "json/tianjin.json";
+	  $(function() {
+	  	 //将地图echarts构建地图放入容器
+		 var myChart = echarts.init(document.getElementById('echar'));
+		 $.get(tianjin, function(tjJson) {
+		    echarts.registerMap('tianjin', tjJson);
+		    myChart.hideLoading();
+		/*地区名称必须跟json文件保持一致，否则为NaN*/
+	    var geoCoordMap = {
+	        '和平区': [117.2, 39.12],
+	        '河东区': [117.22, 39.12],
+	        '河西区': [117.22, 39.12],
+	        '南开区': [117.15, 39.13],
+	        '河北区': [117.18, 39.15],
+	        '红桥区': [117.15, 39.17],
+	        '滨海新区': [117.65, 39.02],
+	        '东丽区': [117.3, 39.08],
+	        '西青区': [117, 39.13],
+	        '津南区': [117.38, 38.98],
+	        '北辰区': [117.13, 39.22],
+	        '武清区': [117.03, 39.38],
+	        '宝坻区': [117.3, 39.72],
+	        '宁河县': [117.82, 39.33],
+	        '静海县': [116.92, 38.93],
+	        '蓟县': [117.4, 40.05],
+	    }
+	    var data = [{
+	            name: '和平区',
+	            value: 199
+	        },
+	        {
+	            name: '河东区',
+	            value: 39
+	        },
+	        {
+	            name: '河西区',
+	            value: 152
+	        },
+	        {
+	            name: '南开区',
+	            value: 299
+	        },
+	        {
+	            name: '河北区',
+	            value: 89
+	        },
+	        {
+	            name: '红桥区',
+	            value: 52
+	        },
+	        {
+	            name: '滨海新区',
+	            value: 219
+	        },
+	        {
+	            name: '东丽区',
+	            value: 139
+	        },
+	        {
+	            name: '西青区',
+	            value: 280
+	        },
+	        {
+	            name: '津南区',
+	            value: 381
+	        },
+	        {
+	            name: '北辰区',
+	            value: 182
+	        },
+	        {
+	            name: '武清区',
+	            value: 283
+	        },
+	        {
+	            name: '宝坻区',
+	            value: 384
+	        },
+	        {
+	            name: '宁河县',
+	            value: 285
+	        },
+	        {
+	            name: '静海县',
+	            value: 186
+	        },
+	        {
+	            name: '蓟县',
+	            value: 357
+	        },
+	    ];
+	    var max = 480,
+	        min = 9; 
+	    var maxSize4Pin = 100,
+	        minSize4Pin = 20;
+	   //构建数据，将地名、经纬度和人口数据整合到一个集合中
+	    var convertData = function(data) {
+	        var res = [];
+	        for (var i = 0; i < data.length; i++) {
+	            var geoCoord = geoCoordMap[data[i].name];
+	            if (geoCoord) {
+	                res.push({
+	                    name: data[i].name,
+	                    value: geoCoord.concat(data[i].value)
+	                });
+	            }
+	        }
+	        return res;
+	    };
+	
+	
+	    option = {
+	        title: {
+	            text: '“大数据” - 天津市',
+	            subtext: '',
+	            x: 'center',
+	            textStyle: {
+	                color: '#ccc'
+	            }
+	        },
+	        //构建提示框显示内容
+	        tooltip: {
+	            trigger: 'item',
+	            formatter: function(params) {
+	                if (typeof(params.value)[2] == "undefined") {
+	                    return params.name + ' : 居住人口' + params.value+";工作人口:"+params.value;
+	                } else {
+	                    return params.name + ' : 居住人口' + params.value[2]+";工作人口:"+params.value[2];
+	                }
+	            }
+	        },
+	        //地图范围分段以及图例
+	        visualMap: {
+	            show: true,
+	            min: 100,
+	            max: 400,
+	            left: 'left',
+	            top: 'bottom',
+	            text: ['高  ', '低'], // 文本，默认为数值文本
+	            seriesIndex: [1],
+	            inRange: {
+	                // color: ['#3B5077', '#031525'] // 蓝黑
+	               // color: ['#ffc0cb', '#800080'] // 红紫
+	                // color: ['#3C3B3F', '#605C3C'] // 黑绿
+	               // color: ['#0f0c29', '#302b63', '#24243e'] // 黑紫黑
+	                // color: ['#23074d', '#cc5333'] // 紫红
+	                // color: ['#00467F', '#A5CC82'] // 蓝绿
+	                // color: ['#1488CC', '#2B32B2'] // 浅蓝
+	                // color: ['#00467F', '#A5CC82'] // 蓝绿
+	                // color: ['#00467F', '#A5CC82'] // 蓝绿
+	                 color: ['#00467F', '#A5CC82'] // 蓝绿
+	                //color: ['#00467F', '#A5CC82'] // 蓝绿
+	
+	            }
+	        },
+	        //地理坐标组件
+	        geo: {
+	            show: true, //是否显示地理坐标系组件。
+	            map: 'tianjin',
+	            label: {    //图形上的文本标签，可用于说明图形的一些数据信息，比如值，名称等
+	                normal: {
+	                    show: false   //是否显示标签。
+	                },
+	                emphasis: {   //图块高亮状态
+	                    show: true,    
+	                }
+	            },
+	            roam: true,//是否开启鼠标缩放和平移漫游
+	            itemStyle: {
+	                normal: {
+	                    areaColor: '#031525',  //地图区域的颜色。
+	                    borderColor: '#3B5077', //图形的描边颜色
+	                }, 
+	                emphasis: {               //设置地块高亮的颜色
+	                    areaColor: '#2B91B7',
+	                }
+	            }
+	        },
+	        series: [
+	        	
+	        	  /**在地图上构建散点图**/
+                 {
+	                name: 'tianjing',
+	                type: 'scatter',          //散点图默认值
+	                coordinateSystem: 'geo',  //该系列使用的坐标系
+	                data: convertData(data),  //使用的构建后的数据
+	                symbolSize: function(val) { //散点图的大小
+	                    return val[2] / 10;
+	                },
+	                label: {                 //散点图标签
+	                    normal: {
+	                        formatter: '{b}',
+	                        position: 'right',
+	                        show: true
+	                    },
+	                    emphasis: {
+	                        show: true
+	                    }
+	                },
+	                itemStyle: {
+	                    normal: {
+	                        color: '#05C3F9'
+	                    }
+	                }
+	            },
+	            {
+	                type: 'map',
+	                map: 'tianjin',
+	                geoIndex: 0,
+	                aspectScale: 0.75, //scale 地图的长宽比。
+	                showLegendSymbol: false, // 存在legend时显示
+	                label: {      //图形上的文本标签，可用于说明图形的一些数据信息，比如值，名称等
+	                    normal: {
+	                        show: false  //是否显示标签。
+	                    },
+	                    emphasis: {    //高亮状态下的多边形和标签样式。
+	                    
+	                        show: false,
+	                        textStyle: {
+	                            color: '#fff'
+	                        }
+	                    }
+	                },
+	                roam: true, //是否开启鼠标缩放和平移漫游
+	                itemStyle: {
+	                    normal: {
+	                        areaColor: '#031525',  //地图区域的颜色。
+	                        borderColor: '#3B5077',
+	                    },
+	                    emphasis: {
+	                        areaColor: '#2B91B7'  //地图区域高亮颜色
+	                    }
+	                },
+	                animation: false,   //是否显示动画
+	                data: data   //指定图系列中的数据内容
+	            },
+	            {   /**构建气泡点*/
+	                name: '点',
+	                type: 'scatter',
+	                coordinateSystem: 'geo',
+	                symbol: 'pin',
+	                name:'总人口数',
+	                symbolSize: function(val) {   //气泡大小
+	                    var a = (maxSize4Pin - minSize4Pin) / (max - min);
+	                    var b = minSize4Pin - a * min;
+	                    b = maxSize4Pin - a * max;
+	                    return a * val[2] + b;
+	                },
+	                label: {              //气泡标签
+	                    normal: {
+	                        show: true,
+	                        textStyle: {
+	                            color: '#fff',
+	                            fontSize: 9,
+	                        },
+	                        formatter:'{@[2]}'
+	                    }
+	                },
+	                itemStyle: {
+	                    normal: {
+	                        color: '#F62157', //气泡颜色
+	                    }
+	                },
+	                zlevel: 6,
+	                data: convertData(data)  //气泡绑定数据集
+	            },
+	            {
+	                name: 'Top 5',
+	                type: 'effectScatter',  //构建有波纹的散点
+	                coordinateSystem: 'geo',   //该系列使用的坐标系
+	                data: convertData(data.sort(function(a, b) {
+	                    return b.value - a.value;
+	                }).slice(0, 5)),
+	                symbolSize: function(val) {     
+	                    return val[2] / 10;       //标记的大小，可以设置成诸如 10 这样单一的数字，也可以用数组分开表示宽和高，例如 [20, 10] 表示标记宽为20，高为10
+	                },
+	                showEffectOn: 'render',      // default: 'render' ]配置何时显示特效。'render' 绘制完成后显示特效。'emphasis' 高亮（hover）的时候显示特效
+
+	                rippleEffect: {             //波纹涟漪特效相关配置
+	                    brushType: 'stroke'     //波纹的绘制方式，可选 'stroke' 和 'fill'。
+	                },
+	                hoverAnimation: true,
+	                label: {                  //图形上的文本标签，可用于说明图形的一些数据信息，比如值，名称等，
+	                    normal: {
+	                        formatter: '{b}',
+	                        position: 'right',
+	                        show: true
+	                    }
+	                },
+	                itemStyle: {         //图形样式
+	                    normal: {
+	                        color: '#05C3F9',  //图形的颜色
+	                        shadowBlur: 10,    //图形阴影的模糊大小
+	                        shadowColor: '#05C3F9' //阴影颜色。支持的格式同color
+	                    }
+	                },
+	                zlevel: 1    //线图所有图形的 zlevel 值。[ default: 0 ]zlevel 大的 Canvas 会放在 zlevel 小的 Canvas 的上面
+	            },
+	
+	        ]
+	    };
+   		 myChart.setOption(option);
+	});
+});
+    </script>
+</head>
+</html>
